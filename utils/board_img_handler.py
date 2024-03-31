@@ -4,9 +4,10 @@ from wand.color import Color
 import chess.svg
 
 
+# Converts svg file to png file representing chess board
 def convert_svg_to_png(board, output_file_name):
     svg_content = chess.svg.board(board)
-    # Project root directory (assuming this script is in the 'utils' directory)
+    # Root directory
     project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
     # Full path to the output file within the resources/boards directory

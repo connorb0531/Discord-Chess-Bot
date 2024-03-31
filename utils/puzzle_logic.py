@@ -1,11 +1,16 @@
 import chess.pgn
 import random
+
+import discord
+
 from resources.puzzles import puzzles  # Assume this imports a collection of chess puzzles
+from utils.board_img_handler import convert_svg_to_png
 
 
 class PuzzleLogic:
     # Initialize the puzzle logic with default values
-    def __init__(self):
+    def __init__(self, user_id):
+        self.user_id = user_id
         self.puzzles = puzzles  # List of puzzles imported from puzzles.py
         self.board = chess.Board()  # Create a new chess board
         self.move_count = 0  # Initialize move count
@@ -56,10 +61,13 @@ class PuzzleLogic:
         else:
             self.current_move = None  # No more moves left
 
-    # Prints the current state of the board
-    def print_board(self):
-        return str(self.board)
-
     # Returns the current move expected in the puzzle
     def get_current_move(self):
         return self.current_move
+
+    def print_board_png(self):
+        file_name = str(self.user_id) + "puzzle.png"
+        convert_svg_to_png(self.board, file_name)
+        file_path = 'resources/boards/' + file_name
+        file = discord.File(file_path)
+        return file

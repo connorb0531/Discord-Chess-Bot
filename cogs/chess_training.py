@@ -1,6 +1,7 @@
 from discord.ext import commands
 
 from components.quit_button import QuitButton
+from utils.board_img_handler import delete_png
 from utils.puzzle_logic import PuzzleLogic
 
 
@@ -22,11 +23,11 @@ class Training(commands.Cog, name="Training"):
     async def puzzle(self, ctx):
         # Start a new puzzle for the user if they don't already have one active
         if ctx.author.id not in self.active_puzzle:
-            puzzle_logic = PuzzleLogic()  # Initialize the puzzle logic
-            self.active_puzzle[ctx.author.id] = puzzle_logic  # Assign the puzzle logic to the user
-            puzzle_logic.setup()  # Setup the puzzle
+            self.active_puzzle[ctx.author.id] = PuzzleLogic(ctx.author.id)  # Assign the puzzle logic to the user
+            puzzle_logic = self.active_puzzle[ctx.author.id]
+            puzzle_logic.setup()  # Set up the puzzle
             # Send the initial board to the user
-            await ctx.send(f"\n```\n{puzzle_logic.print_board()}\n```", view=QuitButton(ctx.author.id, self))
+            await ctx.send(file=puzzle_logic.print_board_png(), view=QuitButton(ctx.author.id, self))
         else:
             await ctx.send("You already have an active puzzle.")
 
@@ -38,23 +39,24 @@ class Training(commands.Cog, name="Training"):
         check, engine_move = puzzle_logic.check_move(move)
         if check:
             if puzzle_logic.current_move is None:  # Puzzle solved condition
-                await ctx.send(f"Puzzle solved! Congratulations! 🎉\n```{puzzle_logic.print_board()}```")
+                await ctx.send(f"Puzzle solved! Congratulations! 🎉", file=puzzle_logic.print_board_png())
                 # Remove the puzzle from active puzzles, allowing a new one to start
                 del self.active_puzzle[ctx.author.id]
             elif engine_move:
                 # Inform the user of the correct move and show the engine's response
-                await ctx.send(f"Correct. Engine plays {engine_move}\n```{puzzle_logic.print_board()}```",
+                await ctx.send(f"Correct. Engine plays {engine_move}", file=puzzle_logic.print_board_png(),
                                view=QuitButton(ctx.author.id, self))
             else:
                 # Acknowledge the correct move and prompt for the next move
-                await ctx.send(f"Correct move. Awaiting your next move.\n```{puzzle_logic.print_board()}```")
+                await ctx.send(f"Correct move. Awaiting your next move.", file=puzzle_logic.print_board_png())
         else:
             # Inform the user the move was incorrect and prompt again
-            await ctx.send("Incorrect move. Try again.", view=QuitButton(ctx.author.id, self))
+            await ctx.send("Incorrect move. Try again.")
 
     # Method to handle a user quitting their puzzle
     async def handle_quit(self, user_id, interaction):
         if user_id in self.active_puzzle:
+            delete_png(user_id, 'puzzle')
             del self.active_puzzle[user_id]
             await interaction.response.send_message("Your puzzle has been quit.", ephemeral=True)
         else:

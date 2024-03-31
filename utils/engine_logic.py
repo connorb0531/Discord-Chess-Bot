@@ -1,9 +1,13 @@
 import chess
+import discord
 from stockfish import Stockfish
+from utils.board_img_handler import convert_svg_to_png
+
 
 class ChessGameWithEngine:
     # Initialize the chess game with a specific skill level for the Stockfish engine
-    def __init__(self, skill_level):
+    def __init__(self, skill_level, user_id):
+        self.user_id = user_id
         self.board = chess.Board()  # Initialize a chess board
         self.stockfish = Stockfish("resources/stockfish-windows-x86-64-avx2.exe")  # Initialize Stockfish engine
         self.stockfish.set_depth(20)  # Set the depth of analysis for the Stockfish engine
@@ -50,3 +54,10 @@ class ChessGameWithEngine:
     # Print the current state of the board
     def print_board(self):
         return str(self.board)
+
+    def print_board_png(self):
+        file_name = str(self.user_id) + "engine.png"
+        convert_svg_to_png(self.board, file_name)
+        file_path = 'resources/boards/' + file_name
+        file = discord.File(file_path)
+        return file
