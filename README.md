@@ -23,7 +23,7 @@ An interactive Discord bot for playing chess and solving training puzzles direct
 
 ---
 
-## 💬 Commands
+## Commands
 
 | Command         | Description                                      |
 |-----------------|--------------------------------------------------|
